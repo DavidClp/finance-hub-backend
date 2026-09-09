@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: financehub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: financehub
+      POSTGRES_PASSWORD: financehub
+      POSTGRES_DB: gerenciador_financeiro
+    ports:
+      - "5442:5432"
+    volumes:
+      - financehub_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financehub -d gerenciador_financeiro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  financehub_pg_data:
