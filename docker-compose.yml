@@ -4,18 +4,41 @@ services:
     container_name: financehub-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: financehub
-      POSTGRES_PASSWORD: financehub
-      POSTGRES_DB: gerenciador_financeiro
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5442:5432"
     volumes:
       - financehub_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U financehub -d gerenciador_financeiro"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  financehub-api:
+    build: .
+    container_name: financehub-api
+    restart: always
+    networks:
+      - proxy
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}]
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      MODE: PROD
+    ports:
+      - "${PORT}:${PORT}"
+
+networks:
+  proxy:
+    external: true
 
 volumes:
   financehub_pg_data:
