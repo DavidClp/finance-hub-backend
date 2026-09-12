@@ -11,6 +11,7 @@ export interface CreateTransactionData {
   amount: number
   type: TransactionType
   date: Date
+  paymentDate: Date
   paymentMethod: PaymentMethod
   notes?: string | null
   isInstallment: boolean
@@ -26,6 +27,7 @@ export interface UpdateTransactionData {
   amount?: number
   type?: TransactionType
   date?: Date
+  paymentDate?: Date
   paymentMethod?: PaymentMethod
   notes?: string | null
   isInstallment?: boolean
@@ -41,9 +43,10 @@ export interface ListTransactionsFilters {
   categoryId?: string
   creditCardId?: string
   search?: string
+  periodBy?: 'payment' | 'purchase'
   page: number
   pageSize: number
-  sort: 'date' | 'amount' | 'description'
+  sort: 'date' | 'paymentDate' | 'amount' | 'description'
   order: 'asc' | 'desc'
 }
 

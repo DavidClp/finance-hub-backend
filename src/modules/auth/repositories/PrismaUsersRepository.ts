@@ -13,4 +13,11 @@ export class PrismaUsersRepository implements IUsersRepository {
   async findById(id: string): Promise<UserRecord | null> {
     return prisma.user.findUnique({ where: { id } })
   }
+
+  async updatePreferences(
+    id: string,
+    data: { creditCardNextMonth: boolean },
+  ): Promise<UserRecord> {
+    return prisma.user.update({ where: { id }, data })
+  }
 }

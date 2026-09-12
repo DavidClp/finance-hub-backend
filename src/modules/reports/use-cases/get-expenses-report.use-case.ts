@@ -17,7 +17,7 @@ export class GetExpensesReportUseCase {
   async execute(userId: string, input: ReportInput) {
     const where: Prisma.TransactionWhereInput = {
       userId,
-      date: {
+      paymentDate: {
         gte: input.from,
         lte: input.to,
       },
@@ -31,12 +31,12 @@ export class GetExpensesReportUseCase {
       where,
       select: {
         amount: true,
-        date: true,
+        paymentDate: true,
         categoryId: true,
         creditCardId: true,
         type: true,
       },
-      orderBy: { date: 'asc' },
+      orderBy: { paymentDate: 'asc' },
     })
 
     const buckets = new Map<string, number>()
@@ -46,10 +46,10 @@ export class GetExpensesReportUseCase {
 
       switch (input.groupBy) {
         case 'day':
-          key = tx.date.toISOString().slice(0, 10)
+          key = tx.paymentDate.toISOString().slice(0, 10)
           break
         case 'month':
-          key = `${tx.date.getUTCFullYear()}-${String(tx.date.getUTCMonth() + 1).padStart(2, '0')}`
+          key = `${tx.paymentDate.getUTCFullYear()}-${String(tx.paymentDate.getUTCMonth() + 1).padStart(2, '0')}`
           break
         case 'category':
           key = tx.categoryId

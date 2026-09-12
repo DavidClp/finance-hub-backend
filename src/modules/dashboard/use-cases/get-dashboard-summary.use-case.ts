@@ -10,9 +10,9 @@ export class GetDashboardSummaryUseCase {
     const monthTransactions = await prisma.transaction.findMany({
       where: {
         userId,
-        date: { gte: start, lt: end },
+        paymentDate: { gte: start, lt: end },
       },
-      orderBy: { date: 'desc' },
+      orderBy: { paymentDate: 'desc' },
     })
 
     const incomeCents = monthTransactions
@@ -58,9 +58,9 @@ export class GetDashboardSummaryUseCase {
     const evolutionTx = await prisma.transaction.findMany({
       where: {
         userId,
-        date: { gte: evolutionStart, lt: end },
+        paymentDate: { gte: evolutionStart, lt: end },
       },
-      select: { date: true, amount: true, type: true },
+      select: { paymentDate: true, amount: true, type: true },
     })
 
     const evolutionMap = new Map<string, { income: number; expenses: number }>()
@@ -72,7 +72,7 @@ export class GetDashboardSummaryUseCase {
     }
 
     for (const tx of evolutionTx) {
-      const key = `${tx.date.getUTCFullYear()}-${String(tx.date.getUTCMonth() + 1).padStart(2, '0')}`
+      const key = `${tx.paymentDate.getUTCFullYear()}-${String(tx.paymentDate.getUTCMonth() + 1).padStart(2, '0')}`
       const bucket = evolutionMap.get(key)
       if (!bucket) continue
       if (tx.type === 'income') bucket.income += tx.amount

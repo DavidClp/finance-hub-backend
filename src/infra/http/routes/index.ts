@@ -5,6 +5,7 @@ import { creditCardsRoutes } from './credit-cards.routes'
 import { dashboardRoutes } from './dashboard.routes'
 import { planningsRoutes } from './plannings.routes'
 import { reportsRoutes } from './reports.routes'
+import { settingsRoutes } from './settings.routes'
 import { transactionsRoutes } from './transactions.routes'
 
 export const routes = Router()
@@ -16,3 +17,4 @@ routes.use('/transactions', transactionsRoutes)
 routes.use('/plannings', planningsRoutes)
 routes.use('/dashboard', dashboardRoutes)
 routes.use('/reports', reportsRoutes)
+routes.use('/settings', settingsRoutes)

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { PrismaUsersRepository } from '../../auth/repositories/PrismaUsersRepository'
 import { PrismaTransactionsRepository } from '../repositories/PrismaTransactionsRepository'
 import {
   CreateTransactionUseCase,
@@ -9,10 +10,11 @@ import {
 } from '../use-cases/transaction.use-cases'
 
 const transactionsRepository = new PrismaTransactionsRepository()
+const usersRepository = new PrismaUsersRepository()
 
 export class TransactionsController {
   async create(request: Request, response: Response) {
-    const useCase = new CreateTransactionUseCase(transactionsRepository)
+    const useCase = new CreateTransactionUseCase(transactionsRepository, usersRepository)
     const data = await useCase.execute(request.user!.id, request.body)
     return response.status(201).json({ data })
   }
@@ -28,9 +30,10 @@ export class TransactionsController {
         categoryId?: string
         creditCardId?: string
         search?: string
+        periodBy?: 'payment' | 'purchase'
         page: number
         pageSize: number
-        sort: 'date' | 'amount' | 'description'
+        sort: 'date' | 'paymentDate' | 'amount' | 'description'
         order: 'asc' | 'desc'
       },
     )
@@ -44,7 +47,7 @@ export class TransactionsController {
   }
 
   async update(request: Request, response: Response) {
-    const useCase = new UpdateTransactionUseCase(transactionsRepository)
+    const useCase = new UpdateTransactionUseCase(transactionsRepository, usersRepository)
     const data = await useCase.execute(request.user!.id, request.params.id, request.body)
     return response.status(200).json({ data })
   }

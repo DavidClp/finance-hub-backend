@@ -1,7 +1,8 @@
 import { toCents } from '../../../shared/utils/money'
-import { addMonths } from '../../../shared/utils/date'
+import { addMonths, resolvePaymentDate } from '../../../shared/utils/date'
 import { buildPagination } from '../../../shared/utils/pagination'
-import { NotFoundError, ValidationError } from '../../../shared/errors/AppError'
+import { NotFoundError, UnauthorizedError, ValidationError } from '../../../shared/errors/AppError'
+import { IUsersRepository } from '../../auth/repositories/IUsersRepository'
 import { ITransactionsRepository } from '../repositories/ITransactionsRepository'
 import { serializeTransaction } from '../serializers/transaction.serializer'
 
@@ -27,10 +28,17 @@ type ListInput = {
   categoryId?: string
   creditCardId?: string
   search?: string
+  periodBy?: 'payment' | 'purchase'
   page: number
   pageSize: number
-  sort: 'date' | 'amount' | 'description'
+  sort: 'date' | 'paymentDate' | 'amount' | 'description'
   order: 'asc' | 'desc'
+}
+
+async function getCreditCardNextMonth(usersRepository: IUsersRepository, userId: string) {
+  const user = await usersRepository.findById(userId)
+  if (!user) throw new UnauthorizedError('Usuário não encontrado.')
+  return user.creditCardNextMonth
 }
 
 async function assertReferences(
@@ -55,7 +63,10 @@ async function assertReferences(
 }
 
 export class CreateTransactionUseCase {
-  constructor(private transactionsRepository: ITransactionsRepository) {}
+  constructor(
+    private transactionsRepository: ITransactionsRepository,
+    private usersRepository: IUsersRepository,
+  ) {}
 
   async execute(userId: string, input: CreateInput) {
     await assertReferences(
@@ -63,6 +74,13 @@ export class CreateTransactionUseCase {
       userId,
       input.categoryId,
       input.creditCardId,
+    )
+
+    const creditCardNextMonth = await getCreditCardNextMonth(this.usersRepository, userId)
+    const basePaymentDate = resolvePaymentDate(
+      input.date,
+      input.paymentMethod,
+      creditCardNextMonth,
     )
 
     const base = {
@@ -87,7 +105,8 @@ export class CreateTransactionUseCase {
 
         return {
           ...base,
-          date: addMonths(input.date, monthsOffset),
+          date: input.date,
+          paymentDate: addMonths(basePaymentDate, monthsOffset),
           isInstallment: true,
           installmentCount: count,
           installmentNumber,
@@ -107,6 +126,7 @@ export class CreateTransactionUseCase {
     const transaction = await this.transactionsRepository.create({
       ...base,
       date: input.date,
+      paymentDate: basePaymentDate,
       isInstallment: false,
       installmentCount: null,
       installmentNumber: null,
@@ -143,7 +163,10 @@ export class GetTransactionUseCase {
 }
 
 export class UpdateTransactionUseCase {
-  constructor(private transactionsRepository: ITransactionsRepository) {}
+  constructor(
+    private transactionsRepository: ITransactionsRepository,
+    private usersRepository: IUsersRepository,
+  ) {}
 
   async execute(userId: string, id: string, input: Partial<CreateInput> & {
     creditCardId?: string | null
@@ -204,11 +227,19 @@ export class UpdateTransactionUseCase {
       merged.creditCardId,
     )
 
+    const creditCardNextMonth = await getCreditCardNextMonth(this.usersRepository, userId)
+    const installmentOffset = merged.isInstallment ? (merged.installmentNumber ?? 1) - 1 : 0
+    const paymentDate = addMonths(
+      resolvePaymentDate(merged.date, merged.paymentMethod, creditCardNextMonth),
+      installmentOffset,
+    )
+
     const transaction = await this.transactionsRepository.update(id, {
       description: merged.description,
       amount: toCents(merged.amount),
       type: merged.type,
       date: merged.date,
+      paymentDate,
       categoryId: merged.categoryId,
       paymentMethod: merged.paymentMethod,
       creditCardId: merged.paymentMethod === 'credit' ? merged.creditCardId : null,

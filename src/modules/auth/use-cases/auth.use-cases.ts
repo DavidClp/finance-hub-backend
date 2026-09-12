@@ -96,6 +96,9 @@ export class GetMeUseCase {
       name: user.name,
       email: user.email,
       createdAt: user.createdAt.toISOString(),
+      preferences: {
+        creditCardNextMonth: user.creditCardNextMonth,
+      },
     }
   }
 }

@@ -65,6 +65,7 @@ async function main() {
         amount: 1200000,
         type: 'income',
         date: new Date(Date.UTC(year, month, 5)),
+        paymentDate: new Date(Date.UTC(year, month, 5)),
         paymentMethod: 'transfer',
       },
       {
@@ -75,6 +76,7 @@ async function main() {
         amount: 18990,
         type: 'expense',
         date: new Date(Date.UTC(year, month, 7)),
+        paymentDate: new Date(Date.UTC(year, month + 1, 7)),
         paymentMethod: 'credit',
       },
       {
@@ -84,6 +86,7 @@ async function main() {
         amount: 4520,
         type: 'expense',
         date: new Date(Date.UTC(year, month, 8)),
+        paymentDate: new Date(Date.UTC(year, month, 8)),
         paymentMethod: 'pix',
       },
       {
@@ -94,6 +97,7 @@ async function main() {
         amount: 8000,
         type: 'expense',
         date: new Date(Date.UTC(year, month, 9)),
+        paymentDate: new Date(Date.UTC(year, month + 1, 9)),
         paymentMethod: 'credit',
       },
     ],

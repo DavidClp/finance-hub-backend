@@ -36,12 +36,13 @@ enum Priority {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default(uuid())
+  name                 String
+  email                String   @unique
+  passwordHash         String   @map("password_hash")
+  creditCardNextMonth  Boolean  @default(true) @map("credit_card_next_month")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   accounts     Account[]
   categories   Category[]
@@ -114,6 +115,7 @@ model Transaction {
   amount            Int
   type              TransactionType
   date              DateTime
+  paymentDate       DateTime        @map("payment_date")
   paymentMethod     PaymentMethod   @map("payment_method")
   notes             String?
   isInstallment     Boolean         @default(false) @map("is_installment")
@@ -129,6 +131,7 @@ model Transaction {
 
   @@index([userId])
   @@index([date])
+  @@index([paymentDate])
   @@index([type])
   @@index([categoryId])
   @@index([creditCardId])

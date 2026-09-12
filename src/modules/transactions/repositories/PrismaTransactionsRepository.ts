@@ -29,14 +29,16 @@ export class PrismaTransactionsRepository implements ITransactionsRepository {
     if (filters.categoryId) where.categoryId = filters.categoryId
     if (filters.creditCardId) where.creditCardId = filters.creditCardId
 
+    const dateField = filters.periodBy === 'purchase' ? 'date' : 'paymentDate'
+
     if (filters.month !== undefined && filters.year !== undefined) {
       const start = new Date(Date.UTC(filters.year, filters.month - 1, 1))
       const end = new Date(Date.UTC(filters.year, filters.month, 1))
-      where.date = { gte: start, lt: end }
+      where[dateField] = { gte: start, lt: end }
     } else if (filters.year !== undefined) {
       const start = new Date(Date.UTC(filters.year, 0, 1))
       const end = new Date(Date.UTC(filters.year + 1, 0, 1))
-      where.date = { gte: start, lt: end }
+      where[dateField] = { gte: start, lt: end }
     }
 
     if (filters.search) {

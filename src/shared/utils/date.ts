@@ -12,3 +12,15 @@ export function addMonths(date: Date, months: number): Date {
   result.setUTCDate(Math.min(day, daysInMonth))
   return result
 }
+
+export function resolvePaymentDate(
+  date: Date,
+  paymentMethod: string,
+  creditCardNextMonth: boolean,
+): Date {
+  if (paymentMethod === 'credit' && creditCardNextMonth) {
+    return addMonths(date, 1)
+  }
+
+  return date
+}

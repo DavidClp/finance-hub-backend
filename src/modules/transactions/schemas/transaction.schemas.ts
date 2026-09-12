@@ -99,8 +99,9 @@ export const listTransactionsQuerySchema = z.object({
   categoryId: z.string().uuid().optional(),
   creditCardId: z.string().uuid().optional(),
   search: z.string().trim().max(160).optional(),
+  periodBy: z.enum(['payment', 'purchase']).default('payment'),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  sort: z.enum(['date', 'amount', 'description']).default('date'),
+  sort: z.enum(['date', 'paymentDate', 'amount', 'description']).default('date'),
   order: z.enum(['asc', 'desc']).default('desc'),
 })

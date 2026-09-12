@@ -8,6 +8,7 @@ export function serializeTransaction(transaction: TransactionRecord) {
     amount: fromCents(transaction.amount),
     type: transaction.type,
     date: transaction.date.toISOString(),
+    paymentDate: transaction.paymentDate.toISOString(),
     categoryId: transaction.categoryId,
     paymentMethod: transaction.paymentMethod,
     ...(transaction.creditCardId ? { creditCardId: transaction.creditCardId } : {}),
