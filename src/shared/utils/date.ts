@@ -13,6 +13,10 @@ export function addMonths(date: Date, months: number): Date {
   return result
 }
 
+export function startOfCurrentUtcMonth(now = new Date()): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+}
+
 export function resolvePaymentDate(
   date: Date,
   paymentMethod: string,

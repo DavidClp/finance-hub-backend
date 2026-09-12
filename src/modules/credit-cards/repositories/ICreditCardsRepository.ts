@@ -32,5 +32,6 @@ export interface ICreditCardsRepository {
   update(id: string, userId: string, data: UpdateCreditCardData): Promise<CreditCardRecord>
   delete(id: string, userId: string): Promise<void>
   countTransactions(creditCardId: string, userId: string): Promise<number>
-  sumExpensesByCard(creditCardId: string, userId: string): Promise<number>
+  sumOpenExpensesByCard(creditCardId: string, userId: string): Promise<number>
+  sumOpenExpensesByUser(userId: string): Promise<Map<string, number>>
 }

@@ -1,4 +1,5 @@
 import { prisma } from '../../../infra/database/prisma'
+import { startOfCurrentUtcMonth } from '../../../shared/utils/date'
 import {
   CreateCreditCardData,
   CreditCardRecord,
@@ -34,16 +35,36 @@ export class PrismaCreditCardsRepository implements ICreditCardsRepository {
     return prisma.transaction.count({ where: { creditCardId, userId } })
   }
 
-  async sumExpensesByCard(creditCardId: string, userId: string): Promise<number> {
+  async sumOpenExpensesByCard(creditCardId: string, userId: string): Promise<number> {
     const result = await prisma.transaction.aggregate({
       where: {
         creditCardId,
         userId,
         type: 'expense',
+        paymentDate: { gte: startOfCurrentUtcMonth() },
       },
       _sum: { amount: true },
     })
 
     return result._sum.amount ?? 0
+  }
+
+  async sumOpenExpensesByUser(userId: string): Promise<Map<string, number>> {
+    const rows = await prisma.transaction.groupBy({
+      by: ['creditCardId'],
+      where: {
+        userId,
+        type: 'expense',
+        creditCardId: { not: null },
+        paymentDate: { gte: startOfCurrentUtcMonth() },
+      },
+      _sum: { amount: true },
+    })
+
+    return new Map(
+      rows
+        .filter((row) => row.creditCardId)
+        .map((row) => [row.creditCardId as string, row._sum.amount ?? 0]),
+    )
   }
 }

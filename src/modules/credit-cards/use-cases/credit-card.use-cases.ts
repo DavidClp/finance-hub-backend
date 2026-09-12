@@ -41,8 +41,14 @@ export class ListCreditCardsUseCase {
   constructor(private creditCardsRepository: ICreditCardsRepository) {}
 
   async execute(userId: string) {
-    const cards = await this.creditCardsRepository.findManyByUser(userId)
-    return cards.map(serializeCreditCard)
+    const [cards, usedByCard] = await Promise.all([
+      this.creditCardsRepository.findManyByUser(userId),
+      this.creditCardsRepository.sumOpenExpensesByUser(userId),
+    ])
+
+    return cards.map((card) =>
+      serializeCreditCardUsage(card, usedByCard.get(card.id) ?? 0),
+    )
   }
 }
 
@@ -53,7 +59,7 @@ export class GetCreditCardUseCase {
     const card = await this.creditCardsRepository.findById(id, userId)
     if (!card) throw new NotFoundError('Cartão não encontrado.')
 
-    const usedCents = await this.creditCardsRepository.sumExpensesByCard(id, userId)
+    const usedCents = await this.creditCardsRepository.sumOpenExpensesByCard(id, userId)
     return serializeCreditCardUsage(card, usedCents)
   }
 }
